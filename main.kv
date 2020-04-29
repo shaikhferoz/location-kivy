@@ -1,0 +1,109 @@
+# Extend the custom drawer class
+<ContentNavigationDrawer>:
+    orientation: "vertical"
+    padding: "8dp"
+    spacing: "8dp"
+
+    AnchorLayout:
+        anchor_x: "left"
+        size_hint_y: None
+        height: avatar.height
+
+        Image:
+            id: avatar
+            size_hint: None, None
+            size: "56dp", "56dp"
+            source: "data/logo/profile.jpg"
+
+    MDLabel:
+        text: "Welcome, Feroz"
+        font_style: "Button"
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    MDLabel:
+        text: "firieshaikh@gmail.com"
+        font_style: "Caption"
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    ScrollView:
+        MDList:
+            OneLineListItem:
+                text: "My Location"
+                on_press:
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "my_location_screen"
+
+            OneLineListItem:
+                text: "Live Stream to cloud"
+                on_press:
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "streaming_screen"
+
+Screen:
+    MDToolbar:
+        id: toolbar
+        pos_hint: {"top": 1}
+        elevation: 10
+        title: "Trackersweb"
+        left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+
+    NavigationLayout:
+        ScreenManager:
+            id: screen_manager
+            Screen:
+                name: "my_location_screen"
+                BoxLayout:
+                    orientation: 'vertical'
+                    Label:
+                        markup: True
+                        text: '[color=06cbd6][size=52]Your current location details are:[/color]'
+                    Label:
+                        markup:True
+                        text: '[color=06cbd6][size=50]' + app.gps_location + '[/color]'
+                    Label:
+                        markup: True
+                        text: '[color=06cbd6][size=45]' + app.gps_status + '[/color]'
+                    BoxLayout:
+                        size_hint_y: None
+                        height: '48dp'
+                        padding: '4dp'
+                        ToggleButton:
+                            text: 'Start' if self.state == 'normal' else 'Stop'
+                            on_state:
+                                app.start(3000, 0) if self.state == 'down' else \
+                                app.stop()
+            Screen:
+                name: "streaming_screen"
+                BoxLayout:
+                    orientation: 'vertical'
+                    Label:
+                        markup: True
+                        text: '[color=06cbd6][size=52]Streaming details:[/color]'
+                    Label:
+                        markup:True
+                        halign: 'center'
+                        size_hint_y: None
+                        text_size: self.width, None
+                        height: self.texture_size[1]
+                        text: '[color=06cbd6][size=45]'+app.awsiot_resp+'[/color]'
+                    Label:
+                        markup:True
+                        text: '[color=06cbd6][size=45]'+app.gps_stream_status+'[/color]'
+                    
+                    BoxLayout:
+                        size_hint_y: None
+                        height: '48dp'
+                        padding: '4dp'
+                        ToggleButton:
+                            text: 'Start Streaming' if self.state == 'normal' else 'Stop Streaming'
+                            on_state:
+                                app.stream_start(5000, 0) if self.state == 'down' else app.stream_stop()
+
+        MDNavigationDrawer:
+            id: nav_drawer
+
+            ContentNavigationDrawer:
+                screen_manager: screen_manager
+                nav_drawer: nav_drawer

@@ -11,10 +11,10 @@ from functools import partial
 import httpx
 import trio
 
-
-
-
 async def send_data_to_awsiot_async(data, cert, root_ca):
+    """
+    This function publishes gps data to the AWS IOT Device gateway asynchronously
+    """
     async with httpx.AsyncClient(cert=cert, verify=root_ca) as client:
         endpoint = 'https://a2dzivea2zp8mx-ats.iot.ap-south-1.amazonaws.com:8443/topics/trackersweb-iot-topic?qos=1'
         response = await client.post(endpoint, data=data)
@@ -26,6 +26,9 @@ async def send_data_to_awsiot_async(data, cert, root_ca):
         return json.loads(data), json.loads(response.text)
 
 class Trackersweb(MDApp):
+    """
+    The main app class. Extends from kivymd.app
+    """
     gps_location = StringProperty()
     gps_location_raw = StringProperty('GPS_RAW_INITIAL_VALUE: from mobile')
     gps_status = StringProperty('Click Start to get GPS location updates')
@@ -34,9 +37,6 @@ class Trackersweb(MDApp):
     
     def request_android_permissions(self):
         """
-        Since API 23, Android requires permission to be requested at runtime.
-        This function requests permission and handles the response via a
-        callback.
         The request will produce a popup if permissions have not already been
         been granted, otherwise it will do nothing.
         """
@@ -45,8 +45,7 @@ class Trackersweb(MDApp):
         def callback(permissions, results):
             """
             Defines the callback to be fired when runtime permission
-            has been granted or denied. This is not strictly required,
-            but added for the sake of completeness.
+            has been granted or denied. 
             """
             if all([res for res in results]):
                 print("callback. All permissions granted.")
@@ -85,6 +84,8 @@ class Trackersweb(MDApp):
         
         self.gps_stream_status = "Click \'Stop Streaming\' to stop streaming"
         data_sent, iot_response = trio.run(partial(send_data_to_awsiot_async, self.gps_location_raw, (pub_cert, private_key), root_ca))
+
+        # To Do: Add continuous streaming
         # Clock.schedule_interval(partial(send_data_to_awsiot, self.gps_location_raw), 0.7)
 
         display_stream_details = {
@@ -117,8 +118,15 @@ class Trackersweb(MDApp):
         pass    
 
 class ContentNavigationDrawer(BoxLayout):
+    """
+    The contents of the main page in the app. 
+    Extended in the main.kv file with : <ContentNavigationDrawer>
+    """
     pass
 
 if __name__ == '__main__':
+    """
+    Initializing the kivy app.
+    """
     Trackersweb().run()
 
